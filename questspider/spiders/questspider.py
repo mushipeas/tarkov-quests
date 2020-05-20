@@ -22,7 +22,7 @@ class QuestSpider(scrapy.Spider):
                         l_i = requirement.index('level') + 6
                         min_level = int(requirement[l_i:l_i+2].strip())
 
-                ul_shift = 1
+                ul_shift = 1 #adjusts 'objectives' & 'rewards' by 1 element if 'requirements' section is present.
             else:
                 requirements = None
                 ul_shift = 0
@@ -55,7 +55,6 @@ class QuestSpider(scrapy.Spider):
             else:
                 dealer = None
                 
-
             yield {
                 'title': response.css('#firstHeading::text').get(),
                 'dealer': dealer,
