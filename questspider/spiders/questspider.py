@@ -1,3 +1,4 @@
+import re
 import scrapy
 
 class QuestSpider(scrapy.Spider):
@@ -15,7 +16,7 @@ class QuestSpider(scrapy.Spider):
         pagetype = response.css('#mw-normal-catlinks > ul > li > a::text').get()
         if pagetype == 'Quests':
 
-            min_level = None
+            min_level = 0
             if response.css('#Requirements::text').get():
                 requirements = response.xpath('string(//div[contains(@id,"mw-content-text")]/div/ul)').get().split("\n")
                 
@@ -28,6 +29,13 @@ class QuestSpider(scrapy.Spider):
             else:
                 requirements = None
                 ul_shift = 0
+
+            rewards = response.xpath('string(//div[contains(@id,"mw-content-text")]/div/ul[{n}])'.format(n=2+ul_shift)).get().split("\n")
+            experience = 0
+            for reward in rewards:
+                if "EXP" in reward:
+                    experience = int(re.sub("[^0-9]", "", reward.split()[0]))
+                    break
 
             metadata = response.css('#va-infobox0-content > td > table:nth-child(3) > tbody > tr > td.va-infobox-label::text').getall() 
             metadata_vals = [a.xpath('string()').get().split(", ") for a in response.css('#va-infobox0-content > td > table:nth-child(3) > tbody > tr > td.va-infobox-content')]
@@ -59,9 +67,10 @@ class QuestSpider(scrapy.Spider):
                 'min_level': min_level,
                 'requirements': requirements,
                 'previous': response.css('#va-infobox0-content > td > table:nth-child(5) > tbody > tr:nth-child(4) > td:nth-child(1) > a::text').getall(),
-                'leads to': response.css('#va-infobox0-content > td > table:nth-child(5) > tbody > tr:nth-child(4) > td:nth-child(3) > a::text').getall(),
+                'leads_to': response.css('#va-infobox0-content > td > table:nth-child(5) > tbody > tr:nth-child(4) > td:nth-child(3) > a::text').getall(),
                 'objectives': response.xpath('string(//div[contains(@id,"mw-content-text")]/div/ul[{n}])'.format(n=1+ul_shift)).get().split("\n"),
-                'rewards': response.xpath('string(//div[contains(@id,"mw-content-text")]/div/ul[{n}])'.format(n=2+ul_shift)).get().split("\n"),
+                'rewards': rewards,
+                'exp': experience
             }
 
 
