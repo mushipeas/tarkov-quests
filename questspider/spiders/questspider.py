@@ -7,9 +7,6 @@ class QuestSpider(scrapy.Spider):
 
     def parse(self, response):
         yield from response.follow_all(css='#mw-whatlinkshere-list > li > a', callback=self.parse_subpage)
-        # for subpagelink in response.css('#mw-whatlinkshere-list > li > a::attr(href)').getall():
-        #     subpagelink = response.urljoin(subpagelink)
-        #     yield scrapy.Request(subpagelink, callback=self.parse_subpage)
 
 
     def parse_subpage(self, response):
@@ -72,7 +69,3 @@ class QuestSpider(scrapy.Spider):
                 'rewards': rewards,
                 'exp': experience
             }
-
-
-#va-infobox0-content > td > table:nth-child(3) > tbody > tr:nth-child(6) > td.va-infobox-label
-#va-infobox0-content > td > table:nth-child(3) > tbody > tr:nth-child(6) > td.va-infobox-content > a
